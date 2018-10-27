@@ -24,17 +24,20 @@ Installing MJPG-streamer for multiple cameras can be simplified by using the scr
 
 **6. MJPG-streamer service installation**
 
-```sudo su
+```
+sudo su
 cd /usr/local 
 git clone https://github.com/john-clark/mjpg-streamer-setup.git
 cd mjpg-streamer-setup
+chown -R pi.pi .
 nano etc/webcam.conf
 ```
 
 _Edit the configuration to your situation. The last 3 lines should match where you installed mjpg\_streamer and should match if you followed the instructions. Frame rate and resolution be changed if you think it is required. But keep in mind that larger images and higher frequencies mean more traffic and that can get a problem. So check if images get submitted with only small delay. If delay builds up you will get problems and should reduce traffic. Also note that some usb webcams do not support mjpg – these are supported but then the boards needs to compress images to jpg increasing the load. So best is to avoid these webcams or use them with low resolutions only. Once you are satisfied with the setup, store configuration and proceed:_
 
-```chmod 755 installWebcams
+```
 ./installWebcams install
+exit
 ```
 
 Now installed webcams are running and can be viewed. Raspi-webcam is reachable over port 8090 while the usb webcams 0-9 are reachable from ports 5050 to 5059.
