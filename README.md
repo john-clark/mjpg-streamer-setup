@@ -48,6 +48,9 @@ _Edit the configuration to your situation. The last 3 lines should match where y
 The following command will list available video formats
 `ffmpeg -f video4linux2 -list_formats all -i /dev/video0`
 
+Still testing the `WEBCAM_USB_PARAMS` variable in the config with settings from this post
+https://3dprinting.stackexchange.com/questions/3261/octoprint-mjpg-streamer-configuration
+
 **OctoPrint Note** 
 
 the URL to type into octoprint are:
