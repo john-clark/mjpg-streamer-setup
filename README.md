@@ -26,7 +26,7 @@ Installing MJPG-streamer for multiple cameras can be simplified by using the scr
 
 ```sudo su
 cd /usr/local 
-git clone [https://github.com/john-clark/mjpg-streamer-setup.git](https://github.com/john-clark/mjpg-streamer-setup.git)
+git clone https://github.com/john-clark/mjpg-streamer-setup.git
 cd mjpg-streamer-setup
 nano etc/webcam.conf
 ```
