@@ -59,3 +59,7 @@ the URL to type into octoprint are:
 `http://{url.or.ip}:5051/?action=snapshot`
 
 More info here - http://docs.octoprint.org/en/master/configuration/config_yaml.html#webcam
+
+**TODO**
+
+make this into a real service and configs for each camera
