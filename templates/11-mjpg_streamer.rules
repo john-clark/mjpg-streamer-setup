@@ -1,0 +1,2 @@
+# file /etc/udev/rules.d/11-mjpgstreamer.rules
+KERNEL=="video?", ACTION=="add", RUN+="/usr/sbin/service mjpg_streamer restart"

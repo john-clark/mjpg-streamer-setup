@@ -1,0 +1,74 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd $DIR
+. ../etc/webcam.conf
+
+DEV=$1
+IFS=$'\n'
+
+if [ "$DEV" == "" ]; then
+    echo "No webcam defined in parameter"
+    echo "mjpgStart 0 : start usb webcam 0 = /dev/video0. 0 might also be 1-9"
+    exit 1
+fi
+
+if [ ! -e "/dev/video${DEV}" ]; then
+    echo "Unknown webcam device /dev/video${DEV}"
+    exit 1
+fi
+VIDEO="/dev/video${DEV}"
+VIDEO_TEST=$(/usr/bin/v4l2-ctl --list-formats-ext -d $VIDEO)
+MJPG_TEST=$(echo "$VIDEO_TEST" | /bin/grep "Pixel Format: 'MJPG' (compressed)")
+MJPG_PARAM_YUYV=""
+PIXEL_FORMAT="MJPG"
+if [ "$MJPG_TEST" == "" ]; then
+    MJPG_PARAM_YUYV=" -y"
+    PIXEL_FORMAT="YUYV"
+    echo "Webcam does not support MJPG - using slower YUYV instead!"
+fi
+BEST_WIDTH=0
+BEST_HEIGHT=0
+BEST_FRAMERATE=0
+BEST_ERROR=$(($WEBCAM_WIDTH * $WEBCAM_HEIGHT))
+IN_FORMAT=0
+for AP in $VIDEO_TEST; do
+     if [[ $AP =~ Pixel[[:space:]]Format:.*\'(.*)\' ]]; then
+        CUR_FORMAT=${BASH_REMATCH[1]}
+        IN_FORMAT=0
+        if [[ "$CUR_FORMAT" == "$PIXEL_FORMAT" ]]; then
+                IN_FORMAT=1
+                IN_FR=0
+        fi
+     fi
+     if (( $IN_FORMAT == 1 )); then
+       if [[ "$AP" =~ Size:.Discrete.([0-9]+)x([0-9]+) ]]; then
+         ACT_W=${BASH_REMATCH[1]}
+         ACT_H=${BASH_REMATCH[2]}
+         ACT_ERROR=$(( ($WEBCAM_WIDTH * $WEBCAM_HEIGHT) - ($ACT_W * $ACT_H) ))
+         if (( $ACT_ERROR < 0 )); then
+           ACT_ERROR=$(( -$ACT_ERROR ))
+         fi
+         if (( $ACT_ERROR < $BEST_ERROR )); then
+           BEST_ERROR=$ACT_ERROR
+           BEST_FRAMERATE=0
+           BEST_WIDTH=$ACT_W
+           BEST_HEIGHT=$ACT_H
+           IN_FR=1
+         else
+           IN_FR=0
+         fi
+       fi
+       if (( $IN_FR == 1 )); then
+         if [[ "$AP" =~ Interval.*\(([0-9]+)\.000 ]]; then
+            ACT_FR=${BASH_REMATCH[1]}
+            if (( $ACT_FR >= $WEBCAM_FRAMERATE )) || (( $BEST_FRAMERATE == 0 )); then
+              BEST_FRAMERATE="${ACT_FR}"
+            fi
+         fi
+       fi
+     fi
+   done
+echo "Best resolution: $BEST_WIDTH x $BEST_HEIGHT at $BEST_FRAMERATE"
+echo "${MJPG_STREAMER} -i \"${MJPG_PLUGIN_DIR}/input_uvc.so -d ${VIDEO} --fps ${BEST_FRAMERATE} -q ${WEBCAM_QUALITY} -r ${BEST_WIDTH}x${BEST_HEIGHT}${MJPG_PARAM_YUYV} ${WEBCAM_USB_PARAMS}\" -o \"${MJPG_PLUGIN_DIR}/output_http.so -p 505${DEV} -w ${MJPG_WWW_DIR}\" -b"
+${MJPG_STREAMER} -i "${MJPG_PLUGIN_DIR}/input_uvc.so -d ${VIDEO} --fps ${BEST_FRAMERATE} -q ${WEBCAM_QUALITY} -r ${BEST_WIDTH}x${BEST_HEIGHT}${MJPG_PARAM_YUYV} ${WEBCAM_USB_PARAMS}" -o "${MJPG_PLUGIN_DIR}/output_http.so -p 505${DEV} -w ${MJPG_WWW_DIR}" -b

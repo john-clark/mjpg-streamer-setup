@@ -1,0 +1,69 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd $DIR
+CMD=$1
+. ./etc/webcam.conf
+
+case $CMD in
+  start)
+    ./bin/mjpgStart $2
+	;;
+  all)
+    killall -9 -w mjpg_streamer
+	./bin/startAllCams
+	;;
+  stop)
+    killall -9 -w mjpg_streamer
+    ;;
+  list)
+    for DEV in "0" "1" "2" "3" "4" "5" "6" "7" "8" "9"
+    do
+        if [ -e "/dev/video${DEV}" ]; then
+            DEVID=$((DEV + 1))
+            echo "/dev/video${DEV} - USB Camera ${DEVID} - port 505${DEV}"
+        fi
+    done
+    ;;
+  install)
+    chmod a+rx installWebcams ./bin/mjpgStart ./bin/startAllCams
+    cp ./templates/11-mjpg_streamer.rules /etc/udev/rules.d/
+    cp ./templates/mjpg_streamer.service /lib/systemd/system
+    cp ./templates/mjpg_streamer.sudo-perms /etc/sudoers.d
+    systemctl --system daemon-reload
+    systemctl enable mjpg_streamer
+    service mjpg_streamer start
+    ;;
+  setParm)
+    if [[ "$4" != "" ]]; then
+      OLDCONF=$(cat ../etc/webcam.conf)
+      killall -9 -w mjpg_streamer
+      echo "$OLDCONF" | sed 's/.*WEBCAM_WIDTH.*/WEBCAM_WIDTH='"$2"'/' | sed 's/.*WEBCAM_HEIGHT.*/WEBCAM_HEIGHT='"$3"'/' | sed 's/.*WEBCAM_FRAMERATE.*/WEBCAM_FRAMERATE='"$4"'/' > ../etc/webcam.conf
+      ./startAllCams
+    else
+      echo "error: Missing parameter!"
+      echo "syntax: installWebcams setResolution width height framerate"
+    fi
+    ;;
+  info)
+    # Version must be first line!
+    echo "version:2"
+    echo "framerate:${WEBCAM_FRAMERATE}"
+    echo "width:${WEBCAM_WIDTH}"
+    echo "height:${WEBCAM_HEIGHT}"
+    echo "quality:${WEBCAM_QUALITY}"
+    echo "usbParams:${WEBCAM_USB_PARAMS}"
+    ;;
+  *)
+	echo "SYNTAX: sudo installWebcam [cmd]"
+	echo " "
+	echo "start 0 - Start specified webcam"
+	echo "all     - Start all connected webcams"
+	echo "stop    - Stop all webcams"
+	echo "list    - List connected webcams"
+	echo "info    - Get version and settings"
+	echo "setParm - leave empty for more info"
+	echo "install - install all scripts in proper place (must use sudo)"
+	;;
+esac
+

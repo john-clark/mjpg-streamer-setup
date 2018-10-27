@@ -1,0 +1,12 @@
+[Unit]
+Description=mjpg_streamer for picam
+After=network.target
+
+[Service]
+Type=simple
+User=root
+RemainAfterExit=yes
+ExecStart=/usr/local/Repetier-Setup/bin/startAllCams
+
+[Install]
+WantedBy=multi-user.target
