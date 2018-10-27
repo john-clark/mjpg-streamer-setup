@@ -30,12 +30,6 @@ cd /usr/local
 git clone https://github.com/john-clark/mjpg-streamer-setup.git
 cd mjpg-streamer-setup
 chown -R pi.pi .
-nano etc/webcam.conf
-```
-
-_Edit the configuration to your situation. The last 3 lines should match where you installed mjpg\_streamer and should match if you followed the instructions. Frame rate and resolution be changed if you think it is required. But keep in mind that larger images and higher frequencies mean more traffic and that can get a problem. So check if images get submitted with only small delay. If delay builds up you will get problems and should reduce traffic. Also note that some usb webcams do not support mjpg – these are supported but then the boards needs to compress images to jpg increasing the load. So best is to avoid these webcams or use them with low resolutions only. Once you are satisfied with the setup, store configuration and proceed:_
-
-```
 ./installWebcams install
 exit
 ```
@@ -46,3 +40,10 @@ Note the URL to type into octoprint are:
 
 `http://{url.or.ip}:5051/?action=stream`
 `http://{url.or.ip}:5051/?action=snapshot`
+
+**Settings:
+
+`nano etc/webcam.conf`
+
+_Edit the configuration to your situation. The last 3 lines should match where you installed mjpg\_streamer and should match if you followed the instructions. Frame rate and resolution be changed if you think it is required. But keep in mind that larger images and higher frequencies mean more traffic and that can get a problem. So check if images get submitted with only small delay. If delay builds up you will get problems and should reduce traffic. Also note that some usb webcams do not support mjpg – these are supported but then the boards needs to compress images to jpg increasing the load. So best is to avoid these webcams or use them with low resolutions only. Once you are satisfied with the setup, store configuration and proceed:_
+
