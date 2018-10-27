@@ -8,7 +8,7 @@ Installing MJPG-streamer for multiple cameras can be simplified by using the scr
 
 **2. Download MJPG-streamer**
 
-`git clone [https://github.com/jacksonliam/mjpg-streamer.git](https://github.com/jacksonliam/mjpg-streamer.git)`
+`git clone https://github.com/jacksonliam/mjpg-streamer.git
 
 **3. Open directory**
 
